@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    active: prod   # change to prod when deploying
+
+server:
+  port: 5050

@@ -1,0 +1,139 @@
+-- public.vw_feedback_details source
+
+CREATE OR REPLACE VIEW public.vw_feedback_details
+AS SELECT f.id,
+    f.created_at,
+    f.created_by,
+    f.message,
+    f.rating,
+    fr.read_at,
+    fr.user_id AS read_user_id,
+        CASE
+            WHEN fr.user_id IS NOT NULL THEN 'Yes'::text
+            ELSE 'No'::text
+        END AS seen
+   FROM feedback f
+     LEFT JOIN feedback_read fr ON f.id = fr.feedback_id
+  ORDER BY f.id;
+
+
+
+
+
+
+-- public.vw_dashboard source
+CREATE OR REPLACE VIEW public.vw_dashboard
+AS SELECT row_number() OVER (ORDER BY u.id) AS id,
+    u.id AS user_id,
+    count(DISTINCT q.id) AS user_total_question,
+    count(DISTINCT
+        CASE
+            WHEN bq.userid IS NOT NULL THEN bq.id
+            ELSE NULL::bigint
+        END) AS user_total_bookmark,
+    ( SELECT count(*) AS count
+           FROM tbl_question) AS total_question,
+    ( SELECT count(*) AS count
+           FROM feedback f
+          WHERE NOT (EXISTS ( SELECT 1
+                   FROM feedback_read fr
+                  WHERE fr.feedback_id = f.id AND fr.user_id = u.id))) AS unread_feedback,
+    ( SELECT count(*) AS count
+           FROM tbl_event e
+          WHERE (e.status::text = ANY (ARRAY['SCHEDULED'::character varying, 'IN_PROGRESS'::character varying]::text[])) AND e.user_id = u.id) AS future_events
+   FROM users u
+     LEFT JOIN tbl_question q ON q.user_id = u.id
+     LEFT JOIN tbl_bookmarked_question bq ON bq.userid = u.id
+  GROUP BY u.id;
+
+
+
+  -- public.vw_userquestions source
+
+  CREATE OR REPLACE VIEW public.vw_userquestions
+  AS SELECT row_number() OVER (ORDER BY id) AS pid,
+      id,
+      answer,
+      category,
+      created_by,
+      created_date,
+      image,
+      level,
+      modified_by,
+      modified_date,
+      question,
+      sub_category,
+      type,
+      user_id,
+      fnbookmarked(id, user_id) AS bookmarked,
+      topic,
+      imageurl
+     FROM tbl_question q;
+
+
+
+
+
+
+
+
+
+    -- DROP FUNCTION public.fnbookmarked(int8, int8);
+
+    CREATE OR REPLACE FUNCTION public.fnbookmarked(p_qid bigint, p_userid bigint)
+     RETURNS character varying
+     LANGUAGE plpgsql
+    AS $function$
+    BEGIN
+        IF EXISTS (
+            SELECT 1
+            FROM tbl_bookmarked_question
+            WHERE qid = p_qid
+            AND userid = p_userid
+        ) THEN
+            RETURN 'Yes';
+        ELSE
+            RETURN 'No';
+        END IF;
+    END;
+    $function$
+    ;
+
+
+
+-- public.vw_transaction source
+
+CREATE OR REPLACE VIEW public.vw_transaction
+AS SELECT row_number() OVER (ORDER BY id) AS pid,
+    id,
+    answer,
+    category,
+    created_by,
+    created_date,
+    image,
+    level,
+    modified_by,
+    modified_date,
+    question,
+    sub_category,
+    type,
+    user_id,
+        CASE
+            WHEN (EXISTS ( SELECT 1
+               FROM tbl_bookmarked_question b
+              WHERE b.qid = q.id AND b.userid = current_setting('app.current_user_id'::text)::integer)) THEN 'Yes'::text
+            ELSE 'No'::text
+        END AS bookmarked,
+    topic,
+        CASE
+            WHEN created_by::text = ((( SELECT users.email
+               FROM users
+              WHERE users.id = current_setting('app.current_user_id'::text)::integer))::text) THEN 'Yes'::text
+            ELSE 'No'::text
+        END AS "createdByCurrentUser",
+            imageurl
+   FROM tbl_question q;
+   
+
+
+
