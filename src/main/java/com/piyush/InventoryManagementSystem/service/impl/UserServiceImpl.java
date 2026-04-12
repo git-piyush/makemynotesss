@@ -9,7 +9,6 @@ import com.piyush.InventoryManagementSystem.enums.AuthProvider;
 import com.piyush.InventoryManagementSystem.enums.UserRole;
 import com.piyush.InventoryManagementSystem.exceptions.InvalidCredentialsException;
 import com.piyush.InventoryManagementSystem.exceptions.NotFoundException;
-import com.piyush.InventoryManagementSystem.repository.CricketdataKeyRepository;
 import com.piyush.InventoryManagementSystem.repository.UserRepository;
 import com.piyush.InventoryManagementSystem.security.JwtUtils;
 import com.piyush.InventoryManagementSystem.service.UserService;
@@ -37,10 +36,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final JwtUtils jwtUtils;
-
-    @Autowired
-    private CricketdataKeyRepository cricketdataKeyRepository;
-
 
     @Override
     public Response registerUser(RegisterRequest registerRequest) {
