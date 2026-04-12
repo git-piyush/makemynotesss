@@ -52,4 +52,9 @@ public class EventController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/delete-event/{id}")
+    public ResponseEntity<Response> deleteEvent(@PathVariable Long id) {
+        return ResponseEntity.ok(eventService.deleteEvent(id));
+    }
+
 }

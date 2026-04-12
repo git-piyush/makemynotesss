@@ -57,7 +57,11 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Response deleteEvent(Long id) {
-        return null;
+        eventRepository.deleteById(id);
+        return Response.builder()
+                .status(200)
+                .message("Message deleted successfully")
+                .build();
     }
 
     @Override
