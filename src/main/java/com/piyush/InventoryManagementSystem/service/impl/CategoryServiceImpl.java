@@ -133,7 +133,20 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<String> getAllCategoryList() {
         List<String> categoryList = categoryRepository.findAllCategoryNames();
-        return categoryList;
+
+        List<String> distinctCategories = categoryList.stream()
+                // normalize to uppercase for comparison
+                .collect(Collectors.toMap(
+                        s -> s.toUpperCase(), // key: uppercase version
+                        s -> s.toUpperCase(), // value: store uppercase version
+                        (existing, replacement) -> existing // if duplicate, keep one
+                ))
+                .values()
+                .stream()
+                .collect(Collectors.toList());
+
+        return distinctCategories;
+
     }
 
     @Override
