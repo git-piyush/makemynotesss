@@ -15,7 +15,7 @@ spring:
             redirect-uri: "https://learning-tracker-backend-ly4g.onrender.com/oauth2/callback/google"
 
   datasource:
-    url: jdbc:postgresql://ep-restless-mountain-a8dje1pl-pooler.eastus2.azure.neon.tech:5432/neondb?sslmode=require
+    url: ${db_url}
     username: ${db_username}
     password: ${db_password}
     driver-class-name: org.postgresql.Driver
