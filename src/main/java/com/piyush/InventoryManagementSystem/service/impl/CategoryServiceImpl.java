@@ -80,7 +80,7 @@ public class CategoryServiceImpl implements CategoryService {
             String strCategory = category.get().getCategory();
             String strSubcategory = category.get().getSubCategory();
             String strTopic = category.get().getTopic();
-            questionList = questionRepository.findByCategoryAndSubCategoryAndTopic(strCategory,strSubcategory,strTopic);
+            questionList = questionRepository.findByCategoryAndSubCategoryAndTopicAndUserId(strCategory,strSubcategory,strTopic,userUtility.getLoggedInUser().getId());
         }
 
         Category categoryToSave = converterUtility.categoryDtoToCategory(categoryDTO);

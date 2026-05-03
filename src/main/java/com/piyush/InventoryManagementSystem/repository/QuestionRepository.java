@@ -44,5 +44,5 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
                      @Param("bgColor") String bgColor,
                      @Param("textColor") String textColor);
 
-    List<Question> findByCategoryAndSubCategoryAndTopic(String strCategory, String strSubcategory, String strTopic);
+    List<Question> findByCategoryAndSubCategoryAndTopicAndUserId(String strCategory, String strSubcategory, String strTopic,Long userId);
 }
