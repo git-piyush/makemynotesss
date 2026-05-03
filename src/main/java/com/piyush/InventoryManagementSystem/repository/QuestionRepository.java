@@ -43,4 +43,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     void updateTheme(@Param("id") Long id,
                      @Param("bgColor") String bgColor,
                      @Param("textColor") String textColor);
+
+    List<Question> findByCategoryAndSubCategoryAndTopic(String strCategory, String strSubcategory, String strTopic);
 }

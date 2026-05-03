@@ -4,9 +4,11 @@ package com.piyush.InventoryManagementSystem.service.impl;
 import com.piyush.InventoryManagementSystem.dto.CategoryDTO;
 import com.piyush.InventoryManagementSystem.dto.Response;
 import com.piyush.InventoryManagementSystem.entity.Category;
+import com.piyush.InventoryManagementSystem.entity.Question;
 import com.piyush.InventoryManagementSystem.exceptions.DuplicateValueException;
 import com.piyush.InventoryManagementSystem.exceptions.NotFoundException;
 import com.piyush.InventoryManagementSystem.repository.CategoryRepository;
+import com.piyush.InventoryManagementSystem.repository.QuestionRepository;
 import com.piyush.InventoryManagementSystem.service.CategoryService;
 import com.piyush.InventoryManagementSystem.utility.ConverterUtility;
 import com.piyush.InventoryManagementSystem.utility.UserUtility;
@@ -42,6 +44,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Autowired
     private UserUtility userUtility;
 
+    @Autowired
+    private QuestionRepository questionRepository;
+
     @Override
     public Response createCategory(CategoryDTO categoryDTO) {
 
@@ -66,10 +71,33 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public Response updateCategory(CategoryDTO categoryDTO) {
+
+        Optional<Category> category = categoryRepository.findById(categoryDTO.getId());
+        List<Question> questionList = null;
+        if(category.isPresent()){
+            String strCategory = category.get().getCategory();
+            String strSubcategory = category.get().getSubCategory();
+            String strTopic = category.get().getTopic();
+            questionList = questionRepository.findByCategoryAndSubCategoryAndTopic(strCategory,strSubcategory,strTopic);
+        }
+
         Category categoryToSave = converterUtility.categoryDtoToCategory(categoryDTO);
         categoryToSave.setUser(userUtility.getLoggedInUser());
         categoryRepository.save(categoryToSave);
+
+        if(questionList!=null && questionList.size()>0){
+            for(Question question:questionList){
+                question.setCategory(categoryToSave.getCategory());
+                question.setSubCategory(categoryToSave.getSubCategory());
+                question.setTopic(categoryToSave.getTopic());
+
+                questionRepository.save(question);
+            }
+        }
+
+
         return Response.builder()
                 .status(200)
                 .message("Category Updated successfully")
